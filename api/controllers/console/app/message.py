@@ -249,7 +249,7 @@ class MessageMoreLikeThisApi(Resource):
             raise InternalServerError()
 
 
-def compact_response(response: Union[dict | Generator]) -> Response:
+def compact_response(response: Union[dict, Generator]) -> Response:
     if isinstance(response, dict):
         return Response(response=json.dumps(response), status=200, mimetype='application/json')
     else:
@@ -295,8 +295,8 @@ class MessageSuggestedQuestionApi(Resource):
         try:
             questions = MessageService.get_suggested_questions_after_answer(
                 app_model=app_model,
-                user=current_user,
                 message_id=message_id,
+                user=current_user,
                 check_enabled=False
             )
         except MessageNotExistsError:
@@ -329,7 +329,7 @@ class MessageApi(Resource):
         message_id = str(message_id)
 
         # get app info
-        app_model = _get_app(app_id, 'chat')
+        app_model = _get_app(app_id)
 
         message = db.session.query(Message).filter(
             Message.id == message_id,

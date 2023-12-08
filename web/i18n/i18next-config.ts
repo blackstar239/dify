@@ -33,9 +33,8 @@ import datasetCreationEn from './lang/dataset-creation.en'
 import datasetCreationZh from './lang/dataset-creation.zh'
 import exploreEn from './lang/explore.en'
 import exploreZh from './lang/explore.zh'
-import { getLocaleOnClient } from '@/i18n/client'
-
-const localLng = getLocaleOnClient()
+import billingEn from './lang/billing.en'
+import billingZh from './lang/billing.zh'
 
 const resources = {
   'en': {
@@ -58,6 +57,8 @@ const resources = {
       datasetSettings: datasetSettingsEn,
       datasetCreation: datasetCreationEn,
       explore: exploreEn,
+      // billing
+      billing: billingEn,
     },
   },
   'zh-Hans': {
@@ -80,6 +81,7 @@ const resources = {
       datasetSettings: datasetSettingsZh,
       datasetCreation: datasetCreationZh,
       explore: exploreZh,
+      billing: billingZh,
     },
   },
 }
@@ -88,7 +90,7 @@ i18n.use(initReactI18next)
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    lng: localLng,
+    lng: undefined,
     fallbackLng: 'en',
     // debug: true,
     resources,

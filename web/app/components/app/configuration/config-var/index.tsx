@@ -73,7 +73,6 @@ const ConfigVar: FC<IConfigVarProps> = ({ promptVariables, readonly, onPromptVar
           delete newItem.max_length
           delete newItem.options
         }
-        console.log(newItem)
         return newItem
       }
 
@@ -170,13 +169,12 @@ const ConfigVar: FC<IConfigVarProps> = ({ promptVariables, readonly, onPromptVar
       }
       title={
         <div className='flex items-center'>
-          <div className='ml-1 mr-1'>{t('appDebug.variableTitle')}</div>
+          <div className='mr-1'>{t('appDebug.variableTitle')}</div>
           {!readonly && (
             <Tooltip htmlContent={<div className='w-[180px]'>
               {t('appDebug.variableTip')}
             </div>} selector='config-var-tooltip'>
-              <HelpCircle className='w-3.5 h-3.5 text-gray-400'/>
-
+              <HelpCircle className='w-[14px] h-[14px] text-gray-400' />
             </Tooltip>
           )}
         </div>
@@ -187,8 +185,8 @@ const ConfigVar: FC<IConfigVarProps> = ({ promptVariables, readonly, onPromptVar
         <div className='pt-2 pb-1 text-xs text-gray-500'>{t('appDebug.notSetVar')}</div>
       )}
       {hasVar && (
-        <div className='rounded-lg border border-gray-200 bg-white'>
-          <table className={`${s.table} w-full border-collapse border-0 rounded-lg text-sm`}>
+        <div className='rounded-lg border border-gray-200 bg-white overflow-x-auto'>
+          <table className={`${s.table} min-w-[440px] w-full max-w-full border-collapse border-0 rounded-lg text-sm`}>
             <thead className="border-b  border-gray-200 text-gray-500 text-xs font-medium">
               <tr className='uppercase'>
                 <td>{t('appDebug.variableTable.key')}</td>
