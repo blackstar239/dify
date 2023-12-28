@@ -19,9 +19,11 @@ export type PlanInfo = {
   vectorSpace: number
   documentProcessingPriority: Priority
   logHistory: number
+  messageRequest: number
+  annotatedResponse: number
 }
 
-export type UsagePlanInfo = Pick<PlanInfo, 'vectorSpace' | 'buildApps' | 'teamMembers'>
+export type UsagePlanInfo = Pick<PlanInfo, 'vectorSpace' | 'buildApps' | 'teamMembers' | 'annotatedResponse'>
 
 export enum DocumentProcessingPriority {
   standard = 'standard',
@@ -30,9 +32,11 @@ export enum DocumentProcessingPriority {
 }
 
 export type CurrentPlanInfoBackend = {
-  enabled: boolean
-  subscription: {
-    plan: Plan
+  billing: {
+    enabled: boolean
+    subscription: {
+      plan: Plan
+    }
   }
   members: {
     size: number
@@ -46,7 +50,12 @@ export type CurrentPlanInfoBackend = {
     size: number
     limit: number // total. 0 means unlimited
   }
+  annotation_quota_limit: {
+    size: number
+    limit: number // total. 0 means unlimited
+  }
   docs_processing: DocumentProcessingPriority
+  can_replace_logo: boolean
 }
 
 export type SubscriptionItem = {
