@@ -356,7 +356,7 @@ const Welcome: FC<IWelcomeProps> = ({
               </div>
               : <div>
               </div>}
-            {
+            {/* {
               customConfig?.remove_webapp_brand
                 ? null
                 : (
@@ -369,7 +369,7 @@ const Welcome: FC<IWelcomeProps> = ({
                     }
                   </a>
                 )
-            }
+            } */}
           </div>
         )}
       </div>
