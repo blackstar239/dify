@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/ash
 
-set -e
+set -o errexit
 
 export NEXT_PUBLIC_DEPLOY_ENV=${DEPLOY_ENV}
 export NEXT_PUBLIC_EDITION=${EDITION}

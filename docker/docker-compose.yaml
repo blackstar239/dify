@@ -200,8 +200,12 @@ services:
 
   # Frontend web application.
   web:
-    image: langgenius/dify-web:0.4.4
+    # image: langgenius/dify-web:0.3.33
+    container_name: dify-web_0.3.33
     restart: always
+    build:
+      context: ../web
+      dockerfile: ../web/Dockerfile
     environment:
       EDITION: SELF_HOSTED
       # The base URL of console application api server, refers to the Console base URL of WEB service if console domain is
@@ -215,8 +219,8 @@ services:
       # The DSN for Sentry error reporting. If not set, Sentry error reporting will be disabled.
       SENTRY_DSN: ''
     # uncomment to expose dify-web port to host
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
 
   # The postgres database.
   db:
