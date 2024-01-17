@@ -1,6 +1,7 @@
 const translation = {
   api: {
     success: '成功',
+    actionSuccess: '操作成功',
     saved: '已保存',
     create: '已创建',
     remove: '已移除',
@@ -31,6 +32,7 @@ const translation = {
     ok: '好的',
     log: '日志',
     learnMore: '了解更多',
+    params: '参数设置',
   },
   placeholder: {
     input: '请输入',
@@ -65,7 +67,7 @@ const translation = {
         '影响常见与罕见词汇使用。\n值较大时，倾向于生成不常见的词汇和表达方式。\n值越小，更倾向于使用常见和普遍接受的词汇或短语。',
       max_tokens: '单次回复限制 max_tokens',
       max_tokensTip:
-        '用于限制回复的最大长度，以 token 为单位。\n较大的值可能会限制给提示词、聊天记录和知识库留出的空间。\n建议将其设置在三分之二以下。',
+        '用于限制回复的最大长度，以 token 为单位。\n较大的值可能会限制给提示词、聊天记录和知识库留出的空间。\n建议将其设置在三分之二以下。\ngpt-4-1106-preview、gpt-4-vision-preview 最大长度 (输入128k，输出4k)',
       maxTokenSettingTip: '您设置的最大 tokens 数较大，可能会导致 prompt、用户问题、知识库内容没有 token 空间进行处理，建议设置到 2/3 以下。',
       setToCurrentModelMaxTokenTip: '最大令牌数更新为当前模型最大的令牌数 {{maxToken}} 的 80%。',
       stop_sequences: '停止序列 stop_sequences',
@@ -96,6 +98,8 @@ const translation = {
     workspace: '工作空间',
     createWorkspace: '创建工作空间',
     helpCenter: '帮助文档',
+    roadmapAndFeedback: '产品路线图 & 用户反馈',
+    community: '社区',
     about: '关于',
     logout: '登出',
   },
@@ -236,6 +240,7 @@ const translation = {
     embeddingModel: {
       key: 'Embedding 模型',
       tip: '设置知识库文档嵌入处理的默认模型，检索和导入知识库均使用该Embedding模型进行向量化处理，切换后将导致已导入的知识库与问题之间的向量维度不一致，从而导致检索失败。为避免检索失败，请勿随意切换该模型。',
+      required: '请选择 Embedding 模型',
     },
     speechToTextModel: {
       key: '语音转文本模型',
@@ -281,6 +286,23 @@ const translation = {
     freeQuota: {
       howToEarn: '如何获取',
     },
+    addMoreModelProvider: '添加更多模型提供商',
+    addModel: '添加模型',
+    modelsNum: '{{num}} 个模型',
+    showModels: '显示模型',
+    showModelsNum: '显示 {{num}} 个模型',
+    collapse: '收起',
+    config: '配置',
+    modelAndParameters: '模型及参数',
+    model: '模型',
+    featureSupported: '支持 {{feature}} 功能',
+    callTimes: '调用次数',
+    buyQuota: '购买额度',
+    getFreeTokens: '获得免费 Tokens',
+    priorityUsing: '优先使用',
+    deprecated: '已弃用',
+    confirmDelete: '确认删除?',
+    quotaTip: '剩余免费额度',
   },
   dataSource: {
     add: '添加数据源',

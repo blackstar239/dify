@@ -2,7 +2,7 @@ version: '3.1'
 services:
   # API service
   api:
-    image: langgenius/dify-api:0.3.33
+    image: langgenius/dify-api:0.4.4
     restart: always
     environment:
       # Startup mode, 'api' starts the API server.
@@ -92,6 +92,8 @@ services:
       QDRANT_URL: http://qdrant:6333
       # The Qdrant API key.
       QDRANT_API_KEY: difyai123456
+      # The Qdrant clinet timeout setting.
+      QDRANT_CLIENT_TIMEOUT: 20
       # Milvus configuration Only available when VECTOR_STORE is `milvus`.
       # The milvus host.
       MILVUS_HOST: 127.0.0.1
@@ -128,7 +130,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: langgenius/dify-api:0.3.33
+    image: langgenius/dify-api:0.4.4
     restart: always
     environment:
       # Startup mode, 'worker' starts the Celery worker for processing the queue.
@@ -170,6 +172,8 @@ services:
       QDRANT_URL: http://qdrant:6333
       # The Qdrant API key.
       QDRANT_API_KEY: difyai123456
+      # The Qdrant clinet timeout setting.
+      QDRANT_CLIENT_TIMEOUT: 20
       # Milvus configuration Only available when VECTOR_STORE is `milvus`.
       # The milvus host.
       MILVUS_HOST: 127.0.0.1
@@ -199,7 +203,7 @@ services:
     # image: langgenius/dify-web:0.3.33
     container_name: dify-web_0.3.33
     restart: always
-    build: 
+    build:
       context: ../web
       dockerfile: ../web/Dockerfile
     environment:
@@ -232,8 +236,9 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - ./volumes/db/data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # uncomment to expose db(postgresql) port to host
+    # ports:
+    #   - "5432:5432"
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 1s
@@ -298,6 +303,7 @@ services:
   # used for reverse proxying the API service and Web service.
   nginx:
     image: nginx:latest
+    restart: always
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/proxy.conf:/etc/nginx/proxy.conf

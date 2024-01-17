@@ -15,7 +15,7 @@ import s from './style.module.css'
 import useAdvancedPromptConfig from './hooks/use-advanced-prompt-config'
 import EditHistoryModal from './config-prompt/conversation-histroy/edit-modal'
 import type {
-  CompletionParams,
+  AnnotationReplyConfig,
   DatasetConfigs,
   Inputs,
   ModelConfig,
@@ -28,11 +28,10 @@ import type { ExternalDataTool } from '@/models/common'
 import type { DataSet } from '@/models/datasets'
 import type { ModelConfig as BackendModelConfig, VisionSettings } from '@/types/app'
 import ConfigContext from '@/context/debug-configuration'
-import ConfigModel from '@/app/components/app/configuration/config-model'
 import Config from '@/app/components/app/configuration/config'
 import Debug from '@/app/components/app/configuration/debug'
 import Confirm from '@/app/components/base/confirm'
-import { ModelFeature, ProviderEnum } from '@/app/components/header/account-setting/model-page/declarations'
+import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { ToastContext } from '@/app/components/base/toast'
 import { fetchAppDetail, updateAppModelConfig } from '@/service/apps'
 import { promptVariablesToUserInputsForm, userInputsFormToPromptVariables } from '@/utils/model-config'
@@ -41,21 +40,25 @@ import { useProviderContext } from '@/context/provider-context'
 import { AppType, ModelModeType, RETRIEVE_TYPE, Resolution, TransferMethod } from '@/types/app'
 import { FlipBackward } from '@/app/components/base/icons/src/vender/line/arrows'
 import { PromptMode } from '@/models/debug'
-import { DEFAULT_CHAT_PROMPT_CONFIG, DEFAULT_COMPLETION_PROMPT_CONFIG } from '@/config'
+import { ANNOTATION_DEFAULT, DEFAULT_CHAT_PROMPT_CONFIG, DEFAULT_COMPLETION_PROMPT_CONFIG } from '@/config'
 import SelectDataSet from '@/app/components/app/configuration/dataset-config/select-dataset'
 import I18n from '@/context/i18n'
 import { useModalContext } from '@/context/modal-context'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import Drawer from '@/app/components/base/drawer'
+import ModelParameterModal from '@/app/components/header/account-setting/model-provider-page/model-parameter-modal'
+import type { FormValue } from '@/app/components/header/account-setting/model-provider-page/declarations'
+import { useTextGenerationCurrentProviderAndModelAndModelList } from '@/app/components/header/account-setting/model-provider-page/hooks'
 
 type PublichConfig = {
   modelConfig: ModelConfig
-  completionParams: CompletionParams
+  completionParams: FormValue
 }
 
 const Configuration: FC = () => {
   const { t } = useTranslation()
   const { notify } = useContext(ToastContext)
+  const [formattingChanged, setFormattingChanged] = useState(false)
   const { setShowAccountSettingModal } = useModalContext()
   const [hasFetchedDetail, setHasFetchedDetail] = useState(false)
   const isLoading = !hasFetchedDetail
@@ -89,23 +92,30 @@ const Configuration: FC = () => {
   const [citationConfig, setCitationConfig] = useState<MoreLikeThisConfig>({
     enabled: false,
   })
+  const [annotationConfig, doSetAnnotationConfig] = useState<AnnotationReplyConfig>({
+    id: '',
+    enabled: false,
+    score_threshold: ANNOTATION_DEFAULT.score_threshold,
+    embedding_model: {
+      embedding_provider_name: '',
+      embedding_model_name: '',
+    },
+  })
+  const setAnnotationConfig = (config: AnnotationReplyConfig, notSetFormatChanged?: boolean) => {
+    doSetAnnotationConfig(config)
+    if (!notSetFormatChanged)
+      setFormattingChanged(true)
+  }
+
   const [moderationConfig, setModerationConfig] = useState<ModerationConfig>({
     enabled: false,
   })
   const [externalDataToolsConfig, setExternalDataToolsConfig] = useState<ExternalDataTool[]>([])
-  const [formattingChanged, setFormattingChanged] = useState(false)
   const [inputs, setInputs] = useState<Inputs>({})
   const [query, setQuery] = useState('')
-  const [completionParams, doSetCompletionParams] = useState<CompletionParams>({
-    max_tokens: 16,
-    temperature: 1, // 0-2
-    top_p: 1,
-    presence_penalty: 1, // -2-2
-    frequency_penalty: 1, // -2-2
-    stop: [],
-  })
+  const [completionParams, doSetCompletionParams] = useState<FormValue>({})
   const [tempStop, setTempStop, getTempStop] = useGetState<string[]>([])
-  const setCompletionParams = (value: CompletionParams) => {
+  const setCompletionParams = (value: FormValue) => {
     const params = { ...value }
 
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -117,7 +127,7 @@ const Configuration: FC = () => {
   }
 
   const [modelConfig, doSetModelConfig] = useState<ModelConfig>({
-    provider: ProviderEnum.openai,
+    provider: 'openai',
     model_id: 'gpt-3.5-turbo',
     mode: ModelModeType.unset,
     configs: {
@@ -167,7 +177,7 @@ const Configuration: FC = () => {
 
     setFormattingChanged(true)
     if (data.find(item => !item.name)) { // has not loaded selected dataset
-      const newSelected = produce(data, (draft) => {
+      const newSelected = produce(data, (draft: any) => {
         data.forEach((item, index) => {
           if (!item.name) { // not fetched database
             const newItem = dataSets.find(i => i.id === item.id)
@@ -207,38 +217,29 @@ const Configuration: FC = () => {
     })
   }
 
-  const { textGenerationModelList } = useProviderContext()
-  const currModel = textGenerationModelList.find(item => item.model_name === modelConfig.model_id)
-  const hasSetCustomAPIKEY = !!textGenerationModelList?.find(({ model_provider: provider }) => {
-    if (provider.provider_type === 'system' && provider.quota_type === 'paid')
-      return true
-
-    if (provider.provider_type === 'custom')
-      return true
-
-    return false
-  })
-  const isTrailFinished = !hasSetCustomAPIKEY && textGenerationModelList
-    .filter(({ model_provider: provider }) => provider.quota_type === 'trial')
-    .every(({ model_provider: provider }) => {
-      const { quota_used, quota_limit } = provider
-      return quota_used === quota_limit
-    })
+  const { hasSettedApiKey } = useProviderContext()
+  const {
+    currentModel: currModel,
+    textGenerationModelList,
+  } = useTextGenerationCurrentProviderAndModelAndModelList(
+    {
+      provider: modelConfig.provider,
+      model: modelConfig.model_id,
+    },
+  )
 
   // Fill old app data missing model mode.
   useEffect(() => {
     if (hasFetchedDetail && !modelModeType) {
-      const mode = textGenerationModelList.find(({ model_name }) => model_name === modelConfig.model_id)?.model_mode
+      const mode = currModel?.model_properties.mode as (ModelModeType | undefined)
       if (mode) {
-        const newModelConfig = produce(modelConfig, (draft) => {
+        const newModelConfig = produce(modelConfig, (draft: ModelConfig) => {
           draft.mode = mode
         })
         setModelConfig(newModelConfig)
       }
     }
-  }, [textGenerationModelList, hasFetchedDetail])
-
-  const hasSetAPIKEY = hasSetCustomAPIKEY || !isTrailFinished
+  }, [textGenerationModelList, hasFetchedDetail, modelModeType, currModel, modelConfig])
 
   const [promptMode, doSetPromptMode] = useState(PromptMode.simple)
   const isAdvancedMode = promptMode === PromptMode.advanced
@@ -279,11 +280,11 @@ const Configuration: FC = () => {
   })
 
   const setModel = async ({
-    id: modelId,
+    modelId,
     provider,
     mode: modeMode,
     features,
-  }: { id: string; provider: ProviderEnum; mode: ModelModeType; features: string[] }) => {
+  }: { modelId: string; provider: string; mode: string; features: string[] }) => {
     if (isAdvancedMode) {
       const appMode = mode
 
@@ -302,23 +303,24 @@ const Configuration: FC = () => {
           await migrateToDefaultPrompt(true, ModelModeType.chat)
       }
     }
-    const newModelConfig = produce(modelConfig, (draft) => {
+    const newModelConfig = produce(modelConfig, (draft: ModelConfig) => {
       draft.provider = provider
       draft.model_id = modelId
-      draft.mode = modeMode
+      draft.mode = modeMode as ModelModeType
     })
 
     setModelConfig(newModelConfig)
-    const supportVision = features && features.includes(ModelFeature.vision)
+    const supportVision = features && features.includes(ModelFeatureEnum.vision)
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     setVisionConfig({
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       ...visionConfig,
       enabled: supportVision,
     }, true)
+    setCompletionParams({})
   }
 
-  const isShowVisionConfig = !!currModel?.features.includes(ModelFeature.vision)
+  const isShowVisionConfig = !!currModel?.features?.includes(ModelFeatureEnum.vision)
   const [visionConfig, doSetVisionConfig] = useState({
     enabled: false,
     number_limits: 2,
@@ -368,6 +370,9 @@ const Configuration: FC = () => {
 
       if (modelConfig.retriever_resource)
         setCitationConfig(modelConfig.retriever_resource)
+
+      if (modelConfig.annotation_reply)
+        setAnnotationConfig(modelConfig.annotation_reply, true)
 
       if (modelConfig.sensitive_word_avoidance)
         setModerationConfig(modelConfig.sensitive_word_avoidance)
@@ -547,8 +552,8 @@ const Configuration: FC = () => {
   return (
     <ConfigContext.Provider value={{
       appId,
-      hasSetAPIKEY,
-      isTrailFinished,
+      hasSetAPIKEY: hasSettedApiKey,
+      isTrailFinished: false,
       mode,
       modelModeType,
       promptMode,
@@ -580,6 +585,8 @@ const Configuration: FC = () => {
       setSpeechToTextConfig,
       citationConfig,
       setCitationConfig,
+      annotationConfig,
+      setAnnotationConfig,
       moderationConfig,
       setModerationConfig,
       externalDataToolsConfig,
@@ -628,7 +635,7 @@ const Configuration: FC = () => {
                         onClick={() => setPromptMode(PromptMode.simple)}
                         className='flex items-center h-6 px-2 bg-indigo-600 shadow-xs border border-gray-200 rounded-lg text-white text-xs font-semibold cursor-pointer space-x-1'
                       >
-                        <FlipBackward className='w-3 h-3 text-white'/>
+                        <FlipBackward className='w-3 h-3 text-white' />
                         <div className='text-xs font-semibold uppercase'>{t('appDebug.promptMode.switchBack')}</div>
                       </div>
                     )}
@@ -639,17 +646,16 @@ const Configuration: FC = () => {
 
             <div className='flex items-center flex-wrap gap-y-2 gap-x-2'>
               {/* Model and Parameters */}
-              <ConfigModel
+              <ModelParameterModal
                 isAdvancedMode={isAdvancedMode}
                 mode={mode}
-                provider={modelConfig.provider as ProviderEnum}
+                provider={modelConfig.provider}
                 completionParams={completionParams}
                 modelId={modelConfig.model_id}
-                setModel={setModel}
-                onCompletionParamsChange={(newParams: CompletionParams) => {
+                setModel={setModel as any}
+                onCompletionParamsChange={(newParams: FormValue) => {
                   setCompletionParams(newParams)
                 }}
-                disabled={!hasSetAPIKEY}
               />
               <div className='w-[1px] h-[14px] bg-gray-200'></div>
               <Button onClick={() => setShowConfirm(true)} className='shrink-0 mr-2 w-[70px] !h-8 !text-[13px] font-medium'>{t('appDebug.operation.resetConfig')}</Button>
@@ -668,7 +674,7 @@ const Configuration: FC = () => {
             </div>
             {!isMobile && <div className="relative w-1/2 grow h-full overflow-y-auto py-4 px-6 bg-gray-50 flex flex-col rounded-tl-2xl border-t border-l" style={{ borderColor: 'rgba(0, 0, 0, 0.02)' }}>
               <Debug
-                hasSetAPIKEY={hasSetAPIKEY}
+                hasSetAPIKEY={hasSettedApiKey}
                 onSetting={() => setShowAccountSettingModal({ payload: 'provider' })}
                 inputs={inputs}
               />
@@ -723,7 +729,7 @@ const Configuration: FC = () => {
         {isMobile && (
           <Drawer showClose isOpen={isShowDebugPanel} onClose={hideDebugPanel} mask footer={null} panelClassname='!bg-gray-50'>
             <Debug
-              hasSetAPIKEY={hasSetAPIKEY}
+              hasSetAPIKEY={hasSettedApiKey}
               onSetting={() => setShowAccountSettingModal({ payload: 'provider' })}
               inputs={inputs}
             />

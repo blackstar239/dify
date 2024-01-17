@@ -1,6 +1,7 @@
 const translation = {
   api: {
     success: 'Success',
+    actionSuccess: 'Action succeeded',
     saved: 'Saved',
     create: 'Created',
     remove: 'Removed',
@@ -31,6 +32,7 @@ const translation = {
     ok: 'OK',
     log: 'Log',
     learnMore: 'Learn More',
+    params: 'Params',
   },
   placeholder: {
     input: 'Please enter',
@@ -65,7 +67,7 @@ const translation = {
         'How much to penalize new tokens based on their existing frequency in the text so far.\nDecreases the model\'s likelihood to repeat the same line verbatim.',
       max_tokens: 'Max token',
       max_tokensTip:
-        'Used to limit the maximum length of the reply, in tokens. \nLarger values may limit the space left for prompt words, chat logs, and Knowledge. \nIt is recommended to set it below two-thirds.',
+        'Used to limit the maximum length of the reply, in tokens. \nLarger values may limit the space left for prompt words, chat logs, and Knowledge. \nIt is recommended to set it below two-thirds\ngpt-4-1106-preview, gpt-4-vision-preview max token (input 128k output 4k)',
       maxTokenSettingTip: 'Your max token setting is high, potentially limiting space for prompts, queries, and data. Consider setting it below 2/3.',
       setToCurrentModelMaxTokenTip: 'Max token is updated to the 80% maximum token of the current model {{maxToken}}.',
       stop_sequences: 'Stop sequences',
@@ -96,12 +98,14 @@ const translation = {
     workspace: 'Workspace',
     createWorkspace: 'Create Workspace',
     helpCenter: 'Help',
+    roadmapAndFeedback: 'Roadmap & Feedback',
+    community: 'Community',
     about: 'About',
     logout: 'Log out',
   },
   settings: {
     accountGroup: 'ACCOUNT',
-    workplaceGroup: 'WORKPLACE',
+    workplaceGroup: 'WORKSPACE',
     account: 'My account',
     members: 'Members',
     billing: 'Billing',
@@ -236,6 +240,7 @@ const translation = {
     embeddingModel: {
       key: 'Embedding Model',
       tip: 'Set the default model for document embedding processing of the Knowledge, both retrieval and import of the Knowledge use this Embedding model for vectorization processing. Switching will cause the vector dimension between the imported Knowledge and the question to be inconsistent, resulting in retrieval failure. To avoid retrieval failure, please do not switch this model at will.',
+      required: 'Embedding Model is required',
     },
     speechToTextModel: {
       key: 'Speech-to-Text Model',
@@ -281,6 +286,23 @@ const translation = {
     freeQuota: {
       howToEarn: 'How to earn',
     },
+    addMoreModelProvider: 'ADD MORE MODEL PROVIDER',
+    addModel: 'Add Model',
+    modelsNum: '{{num}} Models',
+    showModels: 'Show Models',
+    showModelsNum: 'Show {{num}} Models',
+    collapse: 'Collapse',
+    config: 'Config',
+    modelAndParameters: 'Model and Parameters',
+    model: 'Model',
+    featureSupported: '{{feature}} supported',
+    callTimes: 'Call times',
+    buyQuota: 'Buy Quota',
+    getFreeTokens: 'Get free Tokens',
+    priorityUsing: 'Prioritize using',
+    deprecated: 'Deprecated',
+    confirmDelete: 'confirm deletion?',
+    quotaTip: 'Remaining available free tokens',
   },
   dataSource: {
     add: 'Add a data source',
@@ -313,13 +335,13 @@ const translation = {
     },
   },
   apiBasedExtension: {
-    title: 'API-based extensions provide centralized API management, simplifying configuration for easy use across Dify\'s applications.',
+    title: 'API extensions provide centralized API management, simplifying configuration for easy use across Dify\'s applications.',
     link: 'Learn how to develop your own API Extension.',
     linkUrl: 'https://docs.dify.ai/advanced/api_based_extension',
     add: 'Add API Extension',
     selector: {
       title: 'API Extension',
-      placeholder: 'Please select API-based extension',
+      placeholder: 'Please select API extension',
       manage: 'Manage API Extension',
     },
     modal: {
