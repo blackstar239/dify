@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/ash
 
-set -e
+set -o errexit
 
 if [[ "${MIGRATION_ENABLED}" == "true" ]]; then
   echo "Running migrations"
