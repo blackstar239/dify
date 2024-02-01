@@ -110,7 +110,7 @@ const handleStream = (response: Response, onData: IOnData, onCompleted?: IOnComp
               // mute handle message cut off
               onData('', isFirstMessage, {
                 conversationId: bufferObj?.conversation_id,
-                messageId: bufferObj?.id,
+                messageId: bufferObj?.message_id,
               })
               return
             }
@@ -256,7 +256,11 @@ const baseFetch = <T>(
                 }
                 const loginUrl = `${globalThis.location.origin}/signin`
                 bodyJson.then((data: ResponseError) => {
-                  if (data.code === 'not_setup' && IS_CE_EDITION)
+                  if (data.code === 'init_validate_failed' && IS_CE_EDITION)
+                    Toast.notify({ type: 'error', message: data.message, duration: 4000 })
+                  else if (data.code === 'not_init_validated' && IS_CE_EDITION)
+                    globalThis.location.href = `${globalThis.location.origin}/init`
+                  else if (data.code === 'not_setup' && IS_CE_EDITION)
                     globalThis.location.href = `${globalThis.location.origin}/install`
                   else if (location.pathname !== '/signin' || !IS_CE_EDITION)
                     globalThis.location.href = loginUrl
